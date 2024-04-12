@@ -3,6 +3,7 @@ package com.openclassrooms.tourguide.service;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -95,18 +96,37 @@ public class TourGuideService {
     public VisitedLocation trackUserLocation(User user) {
         final VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
         user.addToVisitedLocations(visitedLocation);
-        // rewardsService.calculateRewards(user);
+        rewardsService.calculateRewards(user);
         return visitedLocation;
     }
 
     public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
-        final List<Attraction> nearbyAttractions = new ArrayList<>();
-        for (final Attraction attraction : gpsUtil.getAttractions()) {
-            if (rewardsService.isWithinAttractionProximity(attraction, visitedLocation.location)) {
-                nearbyAttractions.add(attraction);
-            }
-        }
+        final Map<Attraction, Double> attractionDistances = calculateDistanceOfEachAttraction(visitedLocation);
+        final List<Attraction> sortedAttractions = sortAttractionsByDistance(attractionDistances);
+        return selectFiveClosestAttractions(sortedAttractions);
+    }
 
+    private Map<Attraction, Double> calculateDistanceOfEachAttraction(VisitedLocation visitedLocation) {
+        final Map<Attraction, Double> attractionDistances = new HashMap<>();
+        for (final Attraction attraction : gpsUtil.getAttractions()) {
+            final double distance = rewardsService.getDistance(visitedLocation.location, attraction);
+            attractionDistances.put(attraction, distance);
+        }
+        return attractionDistances;
+    }
+
+    private List<Attraction> sortAttractionsByDistance(Map<Attraction, Double> attractionDistances) {
+        final List<Attraction> sortedAttractions = new ArrayList<>(attractionDistances.keySet());
+        Collections.sort(sortedAttractions,
+                (a1, a2) -> Double.compare(attractionDistances.get(a1), attractionDistances.get(a2)));
+        return sortedAttractions;
+    }
+
+    private List<Attraction> selectFiveClosestAttractions(List<Attraction> sortedAttractions) {
+        final List<Attraction> nearbyAttractions = new ArrayList<>();
+        for (int i = 0; i < Math.min(5, sortedAttractions.size()); i++) {
+            nearbyAttractions.add(sortedAttractions.get(i));
+        }
         return nearbyAttractions;
     }
 

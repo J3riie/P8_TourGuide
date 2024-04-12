@@ -43,7 +43,6 @@ public class RewardsService {
     }
 
     public synchronized void calculateRewards(User user) {
-        // List<VisitedLocation> userLocations = user.getVisitedLocations();
         final List<VisitedLocation> userLocations = new ArrayList<>(user.getVisitedLocations());
         final List<Attraction> attractions = gpsUtil.getAttractions();
 

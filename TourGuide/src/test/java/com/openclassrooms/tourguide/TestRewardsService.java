@@ -35,7 +35,6 @@ public class TestRewardsService {
         final Attraction attraction = gpsUtil.getAttractions().get(0);
         user.addToVisitedLocations(new VisitedLocation(user.getUserId(), attraction, new Date()));
         tourGuideService.trackUserLocation(user);
-        rewardsService.calculateRewards(user);
         final List<UserReward> userRewards = user.getUserRewards();
         tourGuideService.tracker.stopTracking();
         assertThat(userRewards).hasSize(1);
@@ -49,7 +48,6 @@ public class TestRewardsService {
         assertTrue(rewardsService.isWithinAttractionProximity(attraction, attraction));
     }
 
-    // Needs fixed - can throw ConcurrentModificationException
     @Test
     public void nearAllAttractions() {
         final GpsUtil gpsUtil = new GpsUtil();
