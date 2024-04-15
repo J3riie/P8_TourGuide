@@ -15,6 +15,7 @@ import java.util.stream.IntStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.openclassrooms.tourguide.attraction.NearbyAttraction;
@@ -57,7 +58,17 @@ public class TourGuideService {
             logger.debug("Finished initializing users");
         }
         tracker = new Tracker(this);
-        addShutDownHook();
+    }
+
+    /**
+     * This method runs tracker.trackUsers() every 5 seconds.
+     * trackUsers return a CompletableFuture<Void>, so it runs in a parallel Thread.
+     * trackUsers isn't itself annotated with @Scheduled because the annotation wants to run a void method.
+     * Also, having a tracker in TourGuideService helps for testing.
+     */
+    @Scheduled(fixedRate = 5000)
+    protected void trackUsersPosition() {
+        tracker.trackUsers();
     }
 
     public List<UserReward> getUserRewards(User user) {
@@ -73,7 +84,7 @@ public class TourGuideService {
     }
 
     public List<User> getAllUsers() {
-        return internalUserMap.values().stream().toList();
+        return internalUserMap.values().parallelStream().toList();
     }
 
     public void addUser(User user) {
@@ -83,7 +94,7 @@ public class TourGuideService {
     }
 
     public List<Provider> getTripDeals(User user) {
-        final int cumulatativeRewardPoints = user.getUserRewards().stream().mapToInt(i -> i.getRewardPoints()).sum();
+        final int cumulatativeRewardPoints = user.getUserRewards().stream().mapToInt(UserReward::getRewardPoints).sum();
         final List<Provider> providers = tripPricer.getPrice(tripPricerApiKey, user.getUserId(),
                 user.getUserPreferences().getNumberOfAdults(), user.getUserPreferences().getNumberOfChildren(),
                 user.getUserPreferences().getTripDuration(), cumulatativeRewardPoints);
@@ -141,15 +152,6 @@ public class TourGuideService {
             nearbyAttractions.add(nearbyAttraction);
         }
         return nearbyAttractions;
-    }
-
-    private void addShutDownHook() {
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                tracker.stopTracking();
-            }
-        });
     }
 
     /**********************************************************************************

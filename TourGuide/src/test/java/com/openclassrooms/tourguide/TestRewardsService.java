@@ -36,7 +36,6 @@ public class TestRewardsService {
         user.addToVisitedLocations(new VisitedLocation(user.getUserId(), attraction, new Date()));
         tourGuideService.trackUserLocation(user);
         final List<UserReward> userRewards = user.getUserRewards();
-        tourGuideService.tracker.stopTracking();
         assertThat(userRewards).hasSize(1);
     }
 
@@ -60,7 +59,6 @@ public class TestRewardsService {
 
         rewardsService.calculateRewards(tourGuideService.getAllUsers().get(0));
         final List<UserReward> userRewards = tourGuideService.getUserRewards(tourGuideService.getAllUsers().get(0));
-        tourGuideService.tracker.stopTracking();
 
         assertEquals(gpsUtil.getAttractions().size(), userRewards.size());
     }
