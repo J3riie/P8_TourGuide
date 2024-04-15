@@ -2,6 +2,7 @@ package com.openclassrooms.tourguide.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
@@ -16,14 +17,14 @@ import rewardCentral.RewardCentral;
 
 @Service
 public class RewardsService {
+
     private static final double STATUTE_MILES_PER_NAUTICAL_MILE = 1.15077945;
 
-    // proximity in miles
-    private final int defaultProximityBuffer = 10;
+    private static final int DEFAULT_PROXIMITY_BUFFER = 10;
 
-    private int proximityBuffer = defaultProximityBuffer;
+    private int proximityBuffer = DEFAULT_PROXIMITY_BUFFER;
 
-    private final int attractionProximityRange = 200;
+    private static final int ATTRACTION_PROXIMITY_RANGE = 200;
 
     private final GpsUtil gpsUtil;
 
@@ -39,7 +40,7 @@ public class RewardsService {
     }
 
     public void setDefaultProximityBuffer() {
-        proximityBuffer = defaultProximityBuffer;
+        proximityBuffer = DEFAULT_PROXIMITY_BUFFER;
     }
 
     public synchronized void calculateRewards(User user) {
@@ -49,26 +50,25 @@ public class RewardsService {
         for (final VisitedLocation visitedLocation : userLocations) {
             for (final Attraction attraction : attractions) {
                 if (user.getUserRewards().stream()
-                        .filter(r -> r.attraction.attractionName.equals(attraction.attractionName)).count() == 0) {
-                    if (nearAttraction(visitedLocation, attraction)) {
-                        user.addUserReward(
-                                new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
-                    }
+                        .filter(r -> r.attraction.attractionName.equals(attraction.attractionName)).count() == 0
+                        && (isNearAttraction(visitedLocation, attraction))) {
+                    user.addUserReward(new UserReward(visitedLocation, attraction,
+                            getRewardPoints(attraction.attractionId, user.getUserId())));
                 }
             }
         }
     }
 
     public boolean isWithinAttractionProximity(Attraction attraction, Location location) {
-        return getDistance(attraction, location) > attractionProximityRange ? false : true;
+        return (getDistance(attraction, location) <= ATTRACTION_PROXIMITY_RANGE);
     }
 
-    private boolean nearAttraction(VisitedLocation visitedLocation, Attraction attraction) {
-        return getDistance(attraction, visitedLocation.location) > proximityBuffer ? false : true;
+    private boolean isNearAttraction(VisitedLocation visitedLocation, Attraction attraction) {
+        return (getDistance(attraction, visitedLocation.location) <= proximityBuffer);
     }
 
-    private int getRewardPoints(Attraction attraction, User user) {
-        return rewardsCentral.getAttractionRewardPoints(attraction.attractionId, user.getUserId());
+    public int getRewardPoints(UUID attractionId, UUID userId) {
+        return rewardsCentral.getAttractionRewardPoints(attractionId, userId);
     }
 
     public double getDistance(Location loc1, Location loc2) {
@@ -81,8 +81,7 @@ public class RewardsService {
                 .acos(Math.sin(lat1) * Math.sin(lat2) + Math.cos(lat1) * Math.cos(lat2) * Math.cos(lon1 - lon2));
 
         final double nauticalMiles = 60 * Math.toDegrees(angle);
-        final double statuteMiles = STATUTE_MILES_PER_NAUTICAL_MILE * nauticalMiles;
-        return statuteMiles;
+        return STATUTE_MILES_PER_NAUTICAL_MILE * nauticalMiles;
     }
 
 }

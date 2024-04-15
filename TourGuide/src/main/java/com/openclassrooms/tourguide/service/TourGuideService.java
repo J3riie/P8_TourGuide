@@ -11,13 +11,13 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.openclassrooms.tourguide.attraction.NearbyAttraction;
 import com.openclassrooms.tourguide.helper.InternalTestHelper;
 import com.openclassrooms.tourguide.tracker.Tracker;
 import com.openclassrooms.tourguide.user.User;
@@ -65,9 +65,7 @@ public class TourGuideService {
     }
 
     public VisitedLocation getUserLocation(User user) {
-        final VisitedLocation visitedLocation = (user.getVisitedLocations().size() > 0) ? user.getLastVisitedLocation()
-                : trackUserLocation(user);
-        return visitedLocation;
+        return (!user.getVisitedLocations().isEmpty()) ? user.getLastVisitedLocation() : trackUserLocation(user);
     }
 
     public User getUser(String userName) {
@@ -75,7 +73,7 @@ public class TourGuideService {
     }
 
     public List<User> getAllUsers() {
-        return internalUserMap.values().stream().collect(Collectors.toList());
+        return internalUserMap.values().stream().toList();
     }
 
     public void addUser(User user) {
@@ -100,10 +98,11 @@ public class TourGuideService {
         return visitedLocation;
     }
 
-    public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
+    public List<NearbyAttraction> getNearByAttractions(VisitedLocation visitedLocation) {
         final Map<Attraction, Double> attractionDistances = calculateDistanceOfEachAttraction(visitedLocation);
         final List<Attraction> sortedAttractions = sortAttractionsByDistance(attractionDistances);
-        return selectFiveClosestAttractions(sortedAttractions);
+        final List<Attraction> closestAttractions = selectFiveClosestAttractions(sortedAttractions);
+        return getNearbyAttractionsDTO(visitedLocation, closestAttractions);
     }
 
     private Map<Attraction, Double> calculateDistanceOfEachAttraction(VisitedLocation visitedLocation) {
@@ -123,9 +122,23 @@ public class TourGuideService {
     }
 
     private List<Attraction> selectFiveClosestAttractions(List<Attraction> sortedAttractions) {
-        final List<Attraction> nearbyAttractions = new ArrayList<>();
+        final List<Attraction> closestAttractions = new ArrayList<>();
         for (int i = 0; i < Math.min(5, sortedAttractions.size()); i++) {
-            nearbyAttractions.add(sortedAttractions.get(i));
+            closestAttractions.add(sortedAttractions.get(i));
+        }
+        return closestAttractions;
+    }
+
+    private List<NearbyAttraction> getNearbyAttractionsDTO(VisitedLocation visitedLocation,
+            final List<Attraction> closestAttractions) {
+        final List<NearbyAttraction> nearbyAttractions = new ArrayList<>();
+        for (final Attraction attraction : closestAttractions) {
+            final double distance = rewardsService.getDistance(new Location(attraction.latitude, attraction.longitude),
+                    visitedLocation.location);
+            final int rewardPoints = rewardsService.getRewardPoints(attraction.attractionId, visitedLocation.userId);
+            final NearbyAttraction nearbyAttraction = new NearbyAttraction(attraction, visitedLocation, distance,
+                    rewardPoints);
+            nearbyAttractions.add(nearbyAttraction);
         }
         return nearbyAttractions;
     }
