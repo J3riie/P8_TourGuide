@@ -3,6 +3,8 @@ package com.openclassrooms.tourguide.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
 
 import org.springframework.stereotype.Service;
 
@@ -43,20 +45,22 @@ public class RewardsService {
         proximityBuffer = DEFAULT_PROXIMITY_BUFFER;
     }
 
-    public synchronized void calculateRewards(User user) {
-        final List<VisitedLocation> userLocations = new ArrayList<>(user.getVisitedLocations());
-        final List<Attraction> attractions = gpsUtil.getAttractions();
+    public synchronized CompletableFuture<Void> calculateRewards(User user) {
+        return CompletableFuture.runAsync(() -> {
+            final List<VisitedLocation> userLocations = new ArrayList<>(user.getVisitedLocations());
+            final List<Attraction> attractions = gpsUtil.getAttractions();
 
-        for (final VisitedLocation visitedLocation : userLocations) {
-            for (final Attraction attraction : attractions) {
-                if (user.getUserRewards().stream()
-                        .filter(r -> r.attraction.attractionName.equals(attraction.attractionName)).count() == 0
-                        && (isNearAttraction(visitedLocation, attraction))) {
-                    user.addUserReward(new UserReward(visitedLocation, attraction,
-                            getRewardPoints(attraction.attractionId, user.getUserId())));
+            for (final VisitedLocation visitedLocation : userLocations) {
+                for (final Attraction attraction : attractions) {
+                    if (user.getUserRewards().stream()
+                            .filter(r -> r.attraction.attractionName.equals(attraction.attractionName)).count() == 0
+                            && (isNearAttraction(visitedLocation, attraction))) {
+                        user.addUserReward(new UserReward(visitedLocation, attraction,
+                                getRewardPoints(attraction.attractionId, user.getUserId())));
+                    }
                 }
             }
-        }
+        }, Executors.newCachedThreadPool());
     }
 
     public boolean isWithinAttractionProximity(Attraction attraction, Location location) {

@@ -1,7 +1,6 @@
 package com.openclassrooms.tourguide.tracker;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,10 +17,9 @@ public class Tracker {
         this.tourGuideService = tourGuideService;
     }
 
-    public CompletableFuture<Void> trackUsers() {
+    public void trackUsers() {
         final List<User> users = tourGuideService.getAllUsers();
         logger.debug("Begin Tracker. Tracking {} users.", users.size());
         users.parallelStream().forEach(tourGuideService::trackUserLocation);
-        return CompletableFuture.completedFuture(null);
     }
 }

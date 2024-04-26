@@ -29,7 +29,7 @@ public class TestTourGuideService {
         final TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
 
         final User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-        final VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user);
+        final VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user).join();
         assertTrue(visitedLocation.userId.equals(user.getUserId()));
     }
 
@@ -80,7 +80,7 @@ public class TestTourGuideService {
         final TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
 
         final User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-        final VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user);
+        final VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user).join();
 
         assertEquals(user.getUserId(), visitedLocation.userId);
     }
@@ -93,7 +93,7 @@ public class TestTourGuideService {
         final TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
 
         final User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-        final VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user);
+        final VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user).join();
 
         final List<NearbyAttraction> attractions = tourGuideService.getNearByAttractions(visitedLocation);
 
