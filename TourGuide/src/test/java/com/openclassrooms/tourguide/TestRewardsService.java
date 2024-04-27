@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import org.junit.jupiter.api.Test;
 
@@ -34,9 +35,12 @@ public class TestRewardsService {
         final User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         final Attraction attraction = gpsUtil.getAttractions().get(0);
         user.addToVisitedLocations(new VisitedLocation(user.getUserId(), attraction, new Date()));
-        tourGuideService.trackUserLocation(user);
-        final List<UserReward> userRewards = user.getUserRewards();
-        assertThat(userRewards).hasSize(1);
+        final CompletableFuture<VisitedLocation> completableFuture = tourGuideService.trackUserLocation(user);
+
+        completableFuture.thenAccept(res -> {
+            final List<UserReward> userRewards = user.getUserRewards();
+            assertThat(userRewards).hasSize(1);
+        });
     }
 
     @Test
@@ -57,10 +61,12 @@ public class TestRewardsService {
         InternalTestHelper.setInternalUserNumber(1);
         final TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
 
-        rewardsService.calculateRewards(tourGuideService.getAllUsers().get(0));
-        final List<UserReward> userRewards = tourGuideService.getUserRewards(tourGuideService.getAllUsers().get(0));
-
-        assertEquals(gpsUtil.getAttractions().size(), userRewards.size());
+        final CompletableFuture<Void> completableFuture = rewardsService
+                .calculateRewards(tourGuideService.getAllUsers().get(0));
+        completableFuture.thenAccept(res -> {
+            final List<UserReward> userRewards = tourGuideService.getUserRewards(tourGuideService.getAllUsers().get(0));
+            assertEquals(gpsUtil.getAttractions().size(), userRewards.size());
+        });
     }
 
 }
