@@ -35,6 +35,7 @@ import tripPricer.TripPricer;
 
 @Service
 public class TourGuideService {
+
     private final Logger logger = LoggerFactory.getLogger(TourGuideService.class);
 
     private final GpsUtil gpsUtil;
@@ -97,7 +98,7 @@ public class TourGuideService {
 
     public List<Provider> getTripDeals(User user) {
         final int cumulatativeRewardPoints = user.getUserRewards().stream().mapToInt(UserReward::getRewardPoints).sum();
-        final List<Provider> providers = tripPricer.getPrice(tripPricerApiKey, user.getUserId(),
+        final List<Provider> providers = tripPricer.getPrice(TRIP_PRICER_API_KEY, user.getUserId(),
                 user.getUserPreferences().getNumberOfAdults(), user.getUserPreferences().getNumberOfChildren(),
                 user.getUserPreferences().getTripDuration(), cumulatativeRewardPoints);
         user.setTripDeals(providers);
@@ -163,7 +164,9 @@ public class TourGuideService {
      * Methods Below: For Internal Testing
      * 
      **********************************************************************************/
-    private static final String tripPricerApiKey = "test-server-api-key";
+    private static final String TRIP_PRICER_API_KEY = "test-server-api-key";
+
+    private static final Random RANDOM = new Random();
 
     // Database connection will be used for external users, but for testing purposes
     // internal users are provided and stored in memory
@@ -179,30 +182,28 @@ public class TourGuideService {
 
             internalUserMap.put(userName, user);
         });
-        logger.debug("Created " + InternalTestHelper.getInternalUserNumber() + " internal test users.");
+        logger.debug("Created {} internal test users.", InternalTestHelper.getInternalUserNumber());
     }
 
     private void generateUserLocationHistory(User user) {
-        IntStream.range(0, 3).forEach(i -> {
-            user.addToVisitedLocations(new VisitedLocation(user.getUserId(),
-                    new Location(generateRandomLatitude(), generateRandomLongitude()), getRandomTime()));
-        });
+        IntStream.range(0, 3).forEach(i -> user.addToVisitedLocations(new VisitedLocation(user.getUserId(),
+                new Location(generateRandomLatitude(), generateRandomLongitude()), getRandomTime())));
     }
 
     private double generateRandomLongitude() {
         final double leftLimit = -180;
         final double rightLimit = 180;
-        return leftLimit + new Random().nextDouble() * (rightLimit - leftLimit);
+        return leftLimit + RANDOM.nextDouble() * (rightLimit - leftLimit);
     }
 
     private double generateRandomLatitude() {
         final double leftLimit = -85.05112878;
         final double rightLimit = 85.05112878;
-        return leftLimit + new Random().nextDouble() * (rightLimit - leftLimit);
+        return leftLimit + RANDOM.nextDouble() * (rightLimit - leftLimit);
     }
 
     private Date getRandomTime() {
-        final LocalDateTime localDateTime = LocalDateTime.now().minusDays(new Random().nextInt(30));
+        final LocalDateTime localDateTime = LocalDateTime.now().minusDays(RANDOM.nextInt(30));
         return Date.from(localDateTime.toInstant(ZoneOffset.UTC));
     }
 

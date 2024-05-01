@@ -5,19 +5,19 @@ import gpsUtil.location.VisitedLocation;
 
 public class NearbyAttraction {
 
-    public String attractionName;
+    public final String attractionName;
 
-    public double attractionLatitude;
+    public final double attractionLatitude;
 
-    public double attractionLongitude;
+    public final double attractionLongitude;
 
-    public double userLatitude;
+    public final double userLatitude;
 
-    public double userLongitude;
+    public final double userLongitude;
 
-    public double distance;
+    public final double distance;
 
-    public int rewardPoints;
+    public final int rewardPoints;
 
     public NearbyAttraction(Attraction attraction, VisitedLocation visitedLocation, double distance, int rewardPoints) {
         attractionName = attraction.attractionName;

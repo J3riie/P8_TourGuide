@@ -1,8 +1,6 @@
 package com.openclassrooms.tourguide;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.BDDAssertions.then;
 
 import java.util.Date;
 import java.util.List;
@@ -39,7 +37,7 @@ public class TestRewardsService {
 
         completableFuture.thenAccept(res -> {
             final List<UserReward> userRewards = user.getUserRewards();
-            assertThat(userRewards).hasSize(1);
+            then(userRewards).hasSize(1);
         });
     }
 
@@ -48,7 +46,7 @@ public class TestRewardsService {
         final GpsUtil gpsUtil = new GpsUtil();
         final RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
         final Attraction attraction = gpsUtil.getAttractions().get(0);
-        assertTrue(rewardsService.isWithinAttractionProximity(attraction, attraction));
+        then(rewardsService.isWithinAttractionProximity(attraction, attraction)).isTrue();
     }
 
     @Test
@@ -65,7 +63,7 @@ public class TestRewardsService {
                 .calculateRewards(tourGuideService.getAllUsers().get(0));
         completableFuture.thenAccept(res -> {
             final List<UserReward> userRewards = tourGuideService.getUserRewards(tourGuideService.getAllUsers().get(0));
-            assertEquals(gpsUtil.getAttractions().size(), userRewards.size());
+            then(gpsUtil.getAttractions()).hasSameSizeAs(userRewards);
         });
     }
 

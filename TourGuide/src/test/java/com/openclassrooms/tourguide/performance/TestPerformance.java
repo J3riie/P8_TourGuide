@@ -11,6 +11,8 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.time.StopWatch;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.openclassrooms.tourguide.helper.InternalTestHelper;
 import com.openclassrooms.tourguide.service.RewardsService;
@@ -24,11 +26,12 @@ import rewardCentral.RewardCentral;
 
 public class TestPerformance {
 
+    private final Logger logger = LoggerFactory.getLogger(TestPerformance.class);
+
     /*
      * These tests are disabled by default so first tests run on a newly pulled project don't last 10 minutes.
      * They should be enabled when wanting to check the performance of the app, and disabled again afterwards.
      */
-
     @Disabled
     @Test
     public void highVolumeTrackLocation() {
@@ -46,8 +49,8 @@ public class TestPerformance {
         stopWatch.start();
         allUsers.parallelStream().forEach(tourGuideService::trackUserLocation);
         stopWatch.stop();
-        System.out.println("highVolumeTrackLocation: Time Elapsed: "
-                + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds.");
+        logger.info("highVolumeTrackLocation: Time Elapsed: {} seconds.",
+                TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
         assertTrue(TimeUnit.MINUTES.toSeconds(15) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
     }
 
@@ -76,8 +79,8 @@ public class TestPerformance {
         });
         stopWatch.stop();
 
-        System.out.println("highVolumeGetRewards: Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime())
-                + " seconds.");
+        logger.info("highVolumeTrackLocation: Time Elapsed: {} seconds.",
+                TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
         assertTrue(TimeUnit.MINUTES.toSeconds(20) >= TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
     }
 

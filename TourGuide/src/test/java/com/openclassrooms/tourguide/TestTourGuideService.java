@@ -1,7 +1,6 @@
 package com.openclassrooms.tourguide;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.BDDAssertions.then;
 
 import java.util.List;
 import java.util.UUID;
@@ -30,7 +29,7 @@ public class TestTourGuideService {
 
         final User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         final VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user).join();
-        assertTrue(visitedLocation.userId.equals(user.getUserId()));
+        then(visitedLocation.userId).isEqualTo(user.getUserId());
     }
 
     @Test
@@ -49,8 +48,8 @@ public class TestTourGuideService {
         final User retrivedUser = tourGuideService.getUser(user.getUserName());
         final User retrivedUser2 = tourGuideService.getUser(user2.getUserName());
 
-        assertEquals(user, retrivedUser);
-        assertEquals(user2, retrivedUser2);
+        then(user).isEqualTo(retrivedUser);
+        then(user2).isEqualTo(retrivedUser2);
     }
 
     @Test
@@ -68,8 +67,8 @@ public class TestTourGuideService {
 
         final List<User> allUsers = tourGuideService.getAllUsers();
 
-        assertTrue(allUsers.contains(user));
-        assertTrue(allUsers.contains(user2));
+        then(allUsers).contains(user);
+        then(allUsers).contains(user2);
     }
 
     @Test
@@ -82,7 +81,7 @@ public class TestTourGuideService {
         final User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         final VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user).join();
 
-        assertEquals(user.getUserId(), visitedLocation.userId);
+        then(user.getUserId()).isEqualTo(visitedLocation.userId);
     }
 
     @Test
@@ -97,7 +96,7 @@ public class TestTourGuideService {
 
         final List<NearbyAttraction> attractions = tourGuideService.getNearByAttractions(visitedLocation);
 
-        assertEquals(5, attractions.size());
+        then(attractions).hasSize(5);
     }
 
     public void getTripDeals() {
@@ -110,7 +109,7 @@ public class TestTourGuideService {
 
         final List<Provider> providers = tourGuideService.getTripDeals(user);
 
-        assertEquals(10, providers.size());
+        then(providers).hasSize(10);
     }
 
 }
