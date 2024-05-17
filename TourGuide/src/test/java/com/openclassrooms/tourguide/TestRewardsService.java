@@ -33,7 +33,7 @@ public class TestRewardsService {
         final User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
         final Attraction attraction = gpsUtil.getAttractions().get(0);
         user.addToVisitedLocations(new VisitedLocation(user.getUserId(), attraction, new Date()));
-        final CompletableFuture<VisitedLocation> completableFuture = tourGuideService.trackUserLocation(user);
+        final CompletableFuture<VisitedLocation> completableFuture = tourGuideService.tracker.trackUserLocation(user);
 
         completableFuture.thenAccept(res -> {
             final List<UserReward> userRewards = user.getUserRewards();

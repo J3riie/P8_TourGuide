@@ -11,8 +11,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
 import org.slf4j.Logger;
@@ -60,7 +58,7 @@ public class TourGuideService {
             initializeInternalUsers();
             logger.debug("Finished initializing users");
         }
-        tracker = new Tracker(this);
+        tracker = new Tracker(this, this.gpsUtil, this.rewardsService);
     }
 
     /**
@@ -76,10 +74,6 @@ public class TourGuideService {
 
     public List<UserReward> getUserRewards(User user) {
         return user.getUserRewards();
-    }
-
-    public VisitedLocation getUserLocation(User user) {
-        return (!user.getVisitedLocations().isEmpty()) ? user.getLastVisitedLocation() : trackUserLocation(user).join();
     }
 
     public User getUser(String userName) {
@@ -103,15 +97,6 @@ public class TourGuideService {
                 user.getUserPreferences().getTripDuration(), cumulatativeRewardPoints);
         user.setTripDeals(providers);
         return providers;
-    }
-
-    public CompletableFuture<VisitedLocation> trackUserLocation(User user) {
-        return CompletableFuture.supplyAsync(() -> {
-            final VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
-            user.addToVisitedLocations(visitedLocation);
-            rewardsService.calculateRewards(user);
-            return visitedLocation;
-        }, Executors.newFixedThreadPool(5));
     }
 
     public List<NearbyAttraction> getNearByAttractions(VisitedLocation visitedLocation) {

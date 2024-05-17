@@ -28,12 +28,12 @@ public class TourGuideController {
 
     @RequestMapping("/getLocation")
     public VisitedLocation getLocation(@RequestParam String userName) {
-        return tourGuideService.getUserLocation(getUser(userName));
+        return tourGuideService.tracker.getUserLocation(getUser(userName));
     }
 
     @RequestMapping("/getNearbyAttractions")
     public List<NearbyAttraction> getNearbyAttractions(@RequestParam String userName) {
-        final VisitedLocation visitedLocation = tourGuideService.getUserLocation(getUser(userName));
+        final VisitedLocation visitedLocation = tourGuideService.tracker.getUserLocation(getUser(userName));
         return tourGuideService.getNearByAttractions(visitedLocation);
     }
 

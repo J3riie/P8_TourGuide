@@ -47,7 +47,7 @@ public class TestPerformance {
 
         final StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        allUsers.parallelStream().forEach(tourGuideService::trackUserLocation);
+        allUsers.parallelStream().forEach(tourGuideService.tracker::trackUserLocation);
         stopWatch.stop();
         logger.info("highVolumeTrackLocation: Time Elapsed: {} seconds.",
                 TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
