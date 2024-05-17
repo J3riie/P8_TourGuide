@@ -60,7 +60,7 @@ public class RewardsService {
                     }
                 }
             }
-        }, Executors.newCachedThreadPool());
+        }, Executors.newFixedThreadPool(5));
     }
 
     public boolean isWithinAttractionProximity(Attraction attraction, Location location) {

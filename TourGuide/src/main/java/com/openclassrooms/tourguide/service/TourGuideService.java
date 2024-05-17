@@ -111,7 +111,7 @@ public class TourGuideService {
             user.addToVisitedLocations(visitedLocation);
             rewardsService.calculateRewards(user);
             return visitedLocation;
-        }, Executors.newCachedThreadPool());
+        }, Executors.newFixedThreadPool(5));
     }
 
     public List<NearbyAttraction> getNearByAttractions(VisitedLocation visitedLocation) {
