@@ -47,7 +47,7 @@ public class TestPerformance {
 
         final StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        allUsers.parallelStream().forEach(tourGuideService.tracker::trackUserLocation);
+        allUsers.stream().forEach(tourGuideService.tracker::trackUserLocation);
         stopWatch.stop();
         logger.info("highVolumeTrackLocation: Time Elapsed: {} seconds.",
                 TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()));
@@ -73,7 +73,7 @@ public class TestPerformance {
         allUsers.parallelStream()
                 .forEach(u -> u.addToVisitedLocations(new VisitedLocation(u.getUserId(), attraction, new Date())));
 
-        allUsers.parallelStream().forEach(u -> {
+        allUsers.stream().forEach(u -> {
             final CompletableFuture<Void> completableFuture = rewardsService.calculateRewards(u);
             completableFuture.thenAccept(res -> assertTrue(u.getUserRewards().size() > 0));
         });

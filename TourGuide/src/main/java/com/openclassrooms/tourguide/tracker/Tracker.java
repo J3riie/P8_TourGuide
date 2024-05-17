@@ -2,7 +2,6 @@ package com.openclassrooms.tourguide.tracker;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +14,7 @@ import gpsUtil.GpsUtil;
 import gpsUtil.location.VisitedLocation;
 
 public class Tracker {
+
     private final Logger logger = LoggerFactory.getLogger(Tracker.class);
 
     private final TourGuideService tourGuideService;
@@ -45,6 +45,6 @@ public class Tracker {
             user.addToVisitedLocations(visitedLocation);
             rewardsService.calculateRewards(user);
             return visitedLocation;
-        }, Executors.newFixedThreadPool(5));
+        });
     }
 }

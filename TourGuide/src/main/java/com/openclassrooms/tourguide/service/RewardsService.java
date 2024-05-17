@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executors;
 
 import org.springframework.stereotype.Service;
 
@@ -60,7 +59,7 @@ public class RewardsService {
                     }
                 }
             }
-        }, Executors.newFixedThreadPool(5));
+        });
     }
 
     public boolean isWithinAttractionProximity(Attraction attraction, Location location) {
