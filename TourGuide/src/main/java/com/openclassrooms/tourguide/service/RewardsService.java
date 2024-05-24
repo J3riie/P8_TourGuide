@@ -44,7 +44,7 @@ public class RewardsService {
         proximityBuffer = DEFAULT_PROXIMITY_BUFFER;
     }
 
-    public synchronized CompletableFuture<Void> calculateRewards(User user) {
+    public CompletableFuture<Void> calculateRewards(User user) {
         return CompletableFuture.runAsync(() -> {
             final List<VisitedLocation> userLocations = new ArrayList<>(user.getVisitedLocations());
             final List<Attraction> attractions = gpsUtil.getAttractions();

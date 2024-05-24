@@ -81,7 +81,7 @@ public class TourGuideService {
     }
 
     public List<User> getAllUsers() {
-        return internalUserMap.values().parallelStream().toList();
+        return internalUserMap.values().stream().toList();
     }
 
     public void addUser(User user) {

@@ -32,7 +32,7 @@ public class Tracker {
     public void trackUsers() {
         final List<User> users = tourGuideService.getAllUsers();
         logger.debug("Begin Tracker. Tracking {} users.", users.size());
-        users.parallelStream().forEach(this::trackUserLocation);
+        users.stream().forEach(this::trackUserLocation);
     }
 
     public VisitedLocation getUserLocation(User user) {
